@@ -30,7 +30,7 @@ class MyFigureCanvas(FigureCanvas):
     通过继承FigureCanvas类，使得该类既是一个PyQt5的Qwidget，又是一个matplotlib的FigureCanvas，这是连接pyqt5与matplotlib的关键
     '''
 
-    def __init__(self, parent=None, width=10, height=5, dpi=100):
+    def __init__(self, xlabel,parent=None, width=6, height=6, dpi=100):
         # 创建一个Figure
         fig = plt.Figure(figsize=(width, height), dpi=dpi, tight_layout=True)  # tight_layout: 用于去除画图时两边的空白
 
@@ -38,8 +38,11 @@ class MyFigureCanvas(FigureCanvas):
         self.setParent(parent)
 
         self.axes = fig.add_subplot(111)  # 添加子图
-        self.axes.spines['top'].set_visible(False)  # 去掉绘图时上面的横线
-        self.axes.spines['right'].set_visible(False)  # 去掉绘图时右面的横线
+        self.axes.set_ylim(0,1)
+        self.axes.set_xlabel(xlabel,fontsize=10)
+        self.axes.set_ylabel('frequency', fontsize=10)
+        #self.axes.spines['top'].set_visible(False)  # 去掉绘图时上面的横线
+        #self.axes.spines['right'].set_visible(False)  # 去掉绘图时右面的横线
 
 
 #在tableview中展示dataframe的类方法
@@ -214,7 +217,7 @@ class ChildWindow2():
         #实例化窗口
         self.gv_visual_data_content1 = MyFigureCanvas(width=self.ui.Evidence.width() / 101,
                                                       height=self.ui.Evidence.height() / 101,
-                                                      )  # 实例化一个FigureCanvas
+                                                      xlabel=self.ui.EvidencecomboBox.currentText())  # 实例化一个FigureCanvas
 
         #清楚区间选择的选项
         self.ui.IntervalcomboBox.clear()
@@ -227,10 +230,11 @@ class ChildWindow2():
 
         #画证据节点的分布图
         q_evidence = model_infer.query(variables=[self.ui.EvidencecomboBox.currentText()])
-        self.gv_visual_data_content1.axes.bar(q_evidence.state_names[self.ui.EvidencecomboBox.currentText()],q_evidence.values,label='Evidence distribution')
+        self.gv_visual_data_content1.axes.bar(q_evidence.state_names[self.ui.EvidencecomboBox.currentText()],q_evidence.values,label=self.ui.EvidencecomboBox.currentText())
+        #self.gv_visual_data_content1.axes.legend()
+
         self.graphic_scene = QGraphicsScene()  # 创建一个QGraphicsScene
-        self.graphic_scene.addWidget(
-            self.gv_visual_data_content1)  # 把图形放到QGraphicsScene中，注意：图形是作为一个QWidget放到放到QGraphicsScene中的
+        self.graphic_scene.addWidget(self.gv_visual_data_content1)  # 把图形放到QGraphicsScene中，注意：图形是作为一个QWidget放到放到QGraphicsScene中的
         self.ui.Evidence.setScene(self.graphic_scene)  # 把QGraphicsScene放入QGraphicsView
         self.ui.Evidence.show()
 
@@ -241,11 +245,11 @@ class ChildWindow2():
         #画目标节点修正前与修正后的图
         self.gv_visual_data_content2 = MyFigureCanvas(width=self.ui.Targetbefore.width() / 101,
                                                       height=self.ui.Targetbefore.height() / 101,
-                                                      )  # 实例化一个FigureCanvas
+                                                      xlabel=self.ui.TargetcomboBox.currentText())  # 实例化一个FigureCanvas
 
         self.gv_visual_data_content3 = MyFigureCanvas(width=self.ui.Targetafter.width() / 101,
                                                       height=self.ui.Targetafter.height() / 101,
-                                                      )  # 实例化一个FigureCanvas
+                                                      xlabel=self.ui.TargetcomboBox.currentText())  # 实例化一个FigureCanvas
 
         model_infer = VariableElimination(model_struct)
         q_before = model_infer.query(variables=[self.ui.TargetcomboBox.currentText()])
