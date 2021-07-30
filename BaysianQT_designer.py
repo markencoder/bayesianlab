@@ -76,6 +76,18 @@ class PdTable(QAbstractTableModel):
         return None
 
 
+class Loginwindow():
+    def __init__(self):
+        self.ui = QUiLoader().load('login.ui')
+        ### 登录界面
+        self.ui.loginButton.clicked.connect(self.mainshow)
+
+    def mainshow(self):
+
+        self.ui2 = Mainwindow()
+        self.ui2.ui.show()
+        self.ui.hide()
+
 #创建主窗口
 class Mainwindow():
     def __init__(self):
@@ -282,6 +294,6 @@ class ChildWindow2():
 
 if __name__ == '__main__':
     app = QApplication([])
-    stats = Mainwindow()
+    stats = Loginwindow()
     stats.ui.show()
     app.exec_()
