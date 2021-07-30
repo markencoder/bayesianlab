@@ -40,6 +40,7 @@ class MyFigureCanvas(FigureCanvas):
         self.axes = fig.add_subplot(111)  # 添加子图
         self.axes.set_ylim(0,1)
         self.axes.set_xlabel(xlabel,fontsize=10)
+        self.axes.tick_params(labelsize=7,labelrotation=45)
         self.axes.set_ylabel('frequency', fontsize=10)
         #self.axes.spines['top'].set_visible(False)  # 去掉绘图时上面的横线
         #self.axes.spines['right'].set_visible(False)  # 去掉绘图时右面的横线
@@ -209,6 +210,8 @@ class ChildWindow2():
         # 模型推断 槽
         self.ui.IntervalcomboBox.currentIndexChanged.connect(self.modelinference)
 
+        self.ui.pushButton.clicked.connect(self.exit)
+
 
     def intervalselect(self):
         global data_processed
@@ -267,12 +270,14 @@ class ChildWindow2():
         q_after = model_infer.query(variables=[self.ui.TargetcomboBox.currentText()], evidence={self.ui.EvidencecomboBox.currentText(): self.ui.IntervalcomboBox.currentText()})
 
         self.gv_visual_data_content3.axes.bar(q_after.state_names[self.ui.TargetcomboBox.currentText()],
-                                              q_after.values, label='Evidence distribution')
+                                              q_after.values, label=self.ui.TargetcomboBox.currentText())
         self.graphic_scene = QGraphicsScene()  # 创建一个QGraphicsScene
         self.graphic_scene.addWidget(
             self.gv_visual_data_content3)  # 把图形放到QGraphicsScene中，注意：图形是作为一个QWidget放到放到QGraphicsScene中的
         self.ui.Targetafter.setScene(self.graphic_scene)  # 把QGraphicsScene放入QGraphicsView
         self.ui.Targetafter.show()
+    def exit(self):
+        sys.exit()
 
 
 if __name__ == '__main__':

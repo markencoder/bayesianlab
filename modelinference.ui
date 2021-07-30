@@ -123,8 +123,8 @@
    <widget class="QGraphicsView" name="Targetafter">
     <property name="geometry">
      <rect>
-      <x>450</x>
-      <y>410</y>
+      <x>480</x>
+      <y>400</y>
       <width>381</width>
       <height>301</height>
      </rect>
@@ -133,7 +133,7 @@
    <widget class="QGraphicsView" name="Evidence">
     <property name="geometry">
      <rect>
-      <x>450</x>
+      <x>490</x>
       <y>30</y>
       <width>371</width>
       <height>311</height>
@@ -143,8 +143,8 @@
    <widget class="QGraphicsView" name="Targetbefore">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>410</y>
+      <x>40</x>
+      <y>400</y>
       <width>381</width>
       <height>301</height>
      </rect>
@@ -172,8 +172,8 @@
    <widget class="QLabel" name="label_5">
     <property name="geometry">
      <rect>
-      <x>70</x>
-      <y>340</y>
+      <x>100</x>
+      <y>350</y>
       <width>291</width>
       <height>31</height>
      </rect>

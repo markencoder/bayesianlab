@@ -29,12 +29,12 @@
      <rect>
       <x>540</x>
       <y>30</y>
-      <width>31</width>
+      <width>91</width>
       <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>...</string>
+     <string>读取文件</string>
     </property>
    </widget>
    <widget class="QPushButton" name="Nextbutton">
