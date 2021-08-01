@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>DATA-VIEW</string>
   </property>
-  <widget class="QGraphicsView" name="graphicsView">
+  <widget class="QGraphicsView" name="dataview">
    <property name="geometry">
     <rect>
      <x>40</x>
