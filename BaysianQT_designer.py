@@ -20,6 +20,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 from pgmpy.inference import VariableElimination
 from pgmpy.factors.discrete import TabularCPD
+import seaborn as sns
 
 matplotlib.use("Qt5Agg")  # 声明使用QT5
 
@@ -106,6 +107,8 @@ class Mainwindow():
         #数据处理 按钮的槽
         self.ui.Runbutton.clicked.connect(self.process)
 
+        self.ui.tableView_result_2.doubleClicked.connect(self.dataview)
+
     #出现子窗口的方法
     def childShowFun1(self):
         self.ui2 = ChildWindow()
@@ -150,6 +153,34 @@ class Mainwindow():
 
         #将data_processed里面全部变成str类型
         data_processed = data_processed.applymap(str)
+
+    #展示数据分布
+    def dataview(self):
+
+        #data = self.ui.tableView_result_2.currentColumn().data()
+        column = self.ui.tableView_result_2.currentIndex().column()
+        draw = drawWindow(column)
+        draw.ui.show()
+
+class drawWindow():
+
+    def __init__(self,column):
+        global data_processed
+        self.ui = QUiLoader().load('data-view.ui')
+        self.dataview1 = MyFigureCanvas(width=self.ui.dataview.width() / 101,
+                                                     height=self.ui.dataview.height() / 101,
+                                                     xlabel=data_processed.columns[column])
+
+        view = data_processed.iloc[:, column].value_counts() / len(data_str.iloc[:, column])
+
+        self.dataview1.axes.bar(view.index,view)
+        # self.gv_visual_data_content1.axes.legend()
+
+        self.graphic_scene = QGraphicsScene()  # 创建一个QGraphicsScene
+        self.graphic_scene.addWidget(self.self.dataview1)  # 把图形放到QGraphicsScene中，注意：图形是作为一个QWidget放到放到QGraphicsScene中的
+        self.ui.dataview.setScene(self.graphic_scene)  # 把QGraphicsScene放入QGraphicsView
+        self.ui.dataview.show()
+
 
 
 #创建子窗口1 的类
