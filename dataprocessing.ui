@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>766</width>
+    <height>609</height>
    </rect>
   </property>
   <property name="font">
@@ -22,8 +22,8 @@
    <widget class="QPushButton" name="learningButton">
     <property name="geometry">
      <rect>
-      <x>620</x>
-      <y>520</y>
+      <x>360</x>
+      <y>530</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -41,8 +41,8 @@
    <widget class="QPushButton" name="Nextbutton2">
     <property name="geometry">
      <rect>
-      <x>710</x>
-      <y>520</y>
+      <x>450</x>
+      <y>530</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -61,9 +61,9 @@
     <property name="geometry">
      <rect>
       <x>60</x>
-      <y>120</y>
-      <width>331</width>
-      <height>341</height>
+      <y>110</y>
+      <width>351</width>
+      <height>391</height>
      </rect>
     </property>
    </widget>
@@ -181,13 +181,44 @@
      <string>模型验证：</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="BNButton">
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>250</y>
+      <width>301</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Times New Roman</family>
+      <pointsize>28</pointsize>
+     </font>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::StrongFocus</enum>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="text">
+     <string>显示B-N 网络图像</string>
+    </property>
+    <property name="autoDefault">
+     <bool>false</bool>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>766</width>
      <height>21</height>
     </rect>
    </property>

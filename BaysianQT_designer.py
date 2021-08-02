@@ -1,6 +1,6 @@
 from PySide2.QtCore import QAbstractTableModel, Qt
 from PySide2.QtWidgets import QApplication, QMainWindow, QPushButton, QLineEdit, QFileDialog, QTableView, \
-    QPlainTextEdit, QWidget, QGraphicsScene
+    QPlainTextEdit, QWidget, QGraphicsScene,QMessageBox
 from PySide2.QtUiTools import QUiLoader
 from PySide2 import QtWidgets
 import pyqtgraph as pg
@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 from pgmpy.inference import VariableElimination
 from pgmpy.factors.discrete import TabularCPD
 import seaborn as sns
-
+import bnlearn as bn
 matplotlib.use("Qt5Agg")  # 声明使用QT5
 
 
@@ -142,11 +142,11 @@ class Mainwindow():
 
         #数据处理部分
         data_nna['sale_after'] = data_nna['SalePrice'].apply(lambda
-                                                                 x: '12789-127500' if 12789 <= x <= 127500 else '127500-157500' if 127500 < x <= 157500 else '157500-212350' if 157500 < x <= 212350 else '212350-755000')
+                                                                 x: '12789-198,342' if 12789 <= x <= 198342 else '198342-383895' if 198342 < x <= 383895 else '383895-569448' if 383895 < x <= 569448 else '569448-755000')
         data_nna['lotf_after'] = data_nna['Lot Frontage'].apply(
-            lambda x: '21-58' if 21 <= x <= 58 else '58-68' if 58 < x <= 68 else '68-80' if 68 < x <= 80 else '80-313')
+            lambda x: '21-94' if 21 <= x <= 94 else '94-167' if 94 < x <= 167 else '167-240' if 167 < x <= 240 else '240-313')
         data_nna['lota_after'] = data_nna['Lot Area'].apply(lambda
-                                                                x: '1300-7225' if 1300 <= x <= 7225.25 else '7225-9248' if 7225.25 < x <= 9248.5 else '9248-11207' if 9248.5 < x <= 11207.75 else '11207-215245')
+                                                                x: '1300-54786' if 1300 <= x <= 54786 else '54786-108272' if 54786 < x <= 108272 else '108272-161758' if 108272 < x <= 161758 else '161758-215245')
         data_processed = data_nna[
             ['sale_after', 'lotf_after', 'lota_after', 'Overall Qual', 'Overall Cond', 'Kitchen Qual', 'House Style',
              'Roof Style']]
@@ -189,6 +189,7 @@ class drawWindow():
 class ChildWindow():
     def __init__(self):
         #导入窗口2
+        self.t = 0
         self.ui = QUiLoader().load('dataprocessing.ui')
 
         #设置窗口2的下一步按钮  的槽
@@ -196,6 +197,10 @@ class ChildWindow():
 
         #设置窗口2的多选项按钮  的槽
         self.ui.buttonGroup.buttonClicked.connect(self.methodselect)
+
+        self.ui.BNButton.clicked.connect(self.BNdrawing)
+
+
 
     #创建窗口3的方法
     def childShowFun2(self):
@@ -228,6 +233,9 @@ class ChildWindow():
             else:
                 self.ui.v_result.setText('模型正常，可继续使用')
 
+            self.t = self.t + 1
+            self.ui.Evidence.show()
+
 
         elif selectedbutton == -4:
             est = PC(data_processed)
@@ -236,6 +244,15 @@ class ChildWindow():
             model_struct.fit(data=data_processed, estimator=MaximumLikelihoodEstimator)
             self.listView.setModel(list(model_struct.edges()))
             self.ui.v_result.setText('模型异常，请更换方法')
+
+    def BNdrawing(self):
+        if self.t == 0:
+            MainWindow = QMainWindow()
+            MessageBox = QMessageBox()
+            MessageBox.warning(MainWindow, "Bayesian-Network", "请先选择网络训练方法并对数据训练，生成B-N网络后再进行绘图！")
+        else:
+            bn.plot(model_struct, figsize=(15, 12))
+
 
 
 class ChildWindow2():
