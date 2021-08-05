@@ -234,7 +234,7 @@ class ChildWindow():
                 self.ui.v_result.setText('模型正常，可继续使用')
 
             self.t = self.t + 1
-            self.ui.Evidence.show()
+            #self.ui.Evidence.show()
 
 
         elif selectedbutton == -4:
@@ -242,8 +242,16 @@ class ChildWindow():
             estimated_model = est.estimate(variant='orig', max_cond_vars=4)
             model_struct = BayesianModel(estimated_model.edges())
             model_struct.fit(data=data_processed, estimator=MaximumLikelihoodEstimator)
-            self.listView.setModel(list(model_struct.edges()))
-            self.ui.v_result.setText('模型异常，请更换方法')
+            df = pd.DataFrame(list(estimated_model.edges()))
+            df = df.rename(columns={0: '父节点', 1: '子节点'})
+            netgraph = PdTable(df)
+            self.ui.graphview.setModel(netgraph)
+            if model_struct.check_model() != True:
+                self.ui.v_result.setText('模型异常，请更换方法')
+            else:
+                self.ui.v_result.setText('模型正常，可继续使用')
+            self.t = self.t + 1
+            #self.ui.Evidence.show()
 
     def BNdrawing(self):
         if self.t == 0:
