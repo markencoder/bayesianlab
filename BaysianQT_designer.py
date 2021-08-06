@@ -1,7 +1,8 @@
 from PySide2.QtCore import QAbstractTableModel, Qt
 from PySide2.QtWidgets import QApplication, QMainWindow, QPushButton, QLineEdit, QFileDialog, QTableView, \
-    QPlainTextEdit, QWidget, QGraphicsScene,QMessageBox
+    QPlainTextEdit, QWidget, QGraphicsScene,QMessageBox,QProgressBar
 from PySide2.QtUiTools import QUiLoader
+#from PyQt5.QtCore import QBasicTimer
 from PySide2 import QtWidgets
 import pyqtgraph as pg
 import pandas as pd
@@ -199,6 +200,8 @@ class ChildWindow():
         self.ui.buttonGroup.buttonClicked.connect(self.methodselect)
 
         self.ui.BNButton.clicked.connect(self.BNdrawing)
+        self.ui.progressBar.setValue(0)
+       # self.timer = QBasicTimer()
 
 
 
@@ -212,12 +215,15 @@ class ChildWindow():
     def methodselect(self):
         global data_processed
         global model_struct
-
+        self.ui.progressBar.setValue(0)
         #选择的id
         selectedbutton = self.ui.buttonGroup.checkedId()
 
         if selectedbutton == -2:
-
+            self.completed = 0
+            while self.completed < 100:
+                self.completed += 0.001
+                self.ui.progressBar.setValue(self.completed)
             #贝叶斯网络运算
             scoring_method = K2Score(data=data_processed)
             est = HillClimbSearch(data=data_processed)
@@ -238,6 +244,10 @@ class ChildWindow():
 
 
         elif selectedbutton == -4:
+            self.completed = 0
+            while self.completed < 100:
+                self.completed += 1
+                self.ui.progressBar.setValue(self.completed)
             est = PC(data_processed)
             estimated_model = est.estimate(variant='orig', max_cond_vars=4)
             model_struct = BayesianModel(estimated_model.edges())
