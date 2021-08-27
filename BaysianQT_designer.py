@@ -24,6 +24,7 @@ from pgmpy.factors.discrete import TabularCPD
 import seaborn as sns
 import bnlearn as bn
 matplotlib.use("Qt5Agg")  # 声明使用QT5
+import networkx as nx
 
 
 #Pyside2中嵌入Matplotlib的绘图 类方法
@@ -278,7 +279,11 @@ class ChildWindow():
             MessageBox = QMessageBox()
             MessageBox.warning(MainWindow, "Bayesian-Network", "请先选择网络训练方法并对数据训练，生成B-N网络后再进行绘图！")
         else:
-            bn.plot(model_struct, figsize=(15, 12))
+            'bn.plot(model_struct, figsize=(15, 12),prop="SimSun")'
+            plt.rcParams['font.family'] = ['sans-serif']
+            plt.rcParams['font.sans-serif'] = ["SimSun"]
+            nx.draw_circular(model_struct, with_labels=True, arrowsize=30, node_size=800, alpha=0.3, font_weight='bold')
+            plt.show()
 
 
 
