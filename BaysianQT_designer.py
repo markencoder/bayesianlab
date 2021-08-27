@@ -33,7 +33,9 @@ class MyFigureCanvas(FigureCanvas):
     '''
 
     def __init__(self, xlabel,parent=None, width=6, height=6, dpi=100):
+
         # 创建一个Figure
+        zhfont1 = matplotlib.font_manager.FontProperties(fname='C:\WINDOWS\FONTS\SIMSUN.TTC')
         fig = plt.Figure(figsize=(width, height), dpi=dpi, tight_layout=True)  # tight_layout: 用于去除画图时两边的空白
 
         FigureCanvas.__init__(self, fig)  # 初始化父类
@@ -41,7 +43,7 @@ class MyFigureCanvas(FigureCanvas):
 
         self.axes = fig.add_subplot(111)  # 添加子图
         self.axes.set_ylim(0,1)
-        self.axes.set_xlabel(xlabel,fontsize=10)
+        self.axes.set_xlabel(xlabel,fontsize=10,fontproperties="SimSun")
         self.axes.tick_params(labelsize=7,labelrotation=45)
         self.axes.set_ylabel('frequency', fontsize=10)
         #self.axes.spines['top'].set_visible(False)  # 去掉绘图时上面的横线
@@ -107,8 +109,8 @@ class Mainwindow():
         self.ui.Nextbutton.clicked.connect(self.childShowFun1)
         #数据处理 按钮的槽
         self.ui.Runbutton.clicked.connect(self.process)
-
-        self.ui.tableView_result_2.doubleClicked.connect(self.dataview)
+        self.ui.tableView_result.doubleClicked.connect(self.dataview1)
+        self.ui.tableView_result_2.doubleClicked.connect(self.dataview2)
 
     #出现子窗口的方法
     def childShowFun1(self):
@@ -133,7 +135,8 @@ class Mainwindow():
             "数据类型 (*.xls *.xlsx *.csv)"  # 选择类型过滤项，过滤内容在括号中
         )
         self.ui.line1.setText(filePath)
-        data = pd.read_csv(filePath, header=0)
+        data = pd.read_excel(filePath, header=0)
+        '''
         data = data[
             ['SalePrice', 'Lot Frontage', 'Lot Area', 'Overall Qual', 'Overall Cond', 'Kitchen Qual', 'House Style',
              'Roof Style']]
@@ -151,12 +154,20 @@ class Mainwindow():
         data_processed = data_nna[
             ['sale_after', 'lotf_after', 'lota_after', 'Overall Qual', 'Overall Cond', 'Kitchen Qual', 'House Style',
              'Roof Style']]
-
+        '''
         #将data_processed里面全部变成str类型
-        data_processed = data_processed.applymap(str)
+        data_processed = data.applymap(str)
+        search_result_model = PdTable(data_processed)
+        self.ui.tableView_result.setModel(search_result_model)
 
-    #展示数据分布
-    def dataview(self):
+        #展示数据分布
+    def dataview1(self):
+        # data = self.ui.tableView_result_2.currentColumn().data()
+        column = self.ui.tableView_result.currentIndex().column()
+        self.draw = drawWindow(column)
+        self.draw.ui.show()
+
+    def dataview2(self):
 
         #data = self.ui.tableView_result_2.currentColumn().data()
         column = self.ui.tableView_result_2.currentIndex().column()
@@ -176,6 +187,7 @@ class drawWindow():
 
         view = data_processed.iloc[:, column].value_counts() / len(data_processed.iloc[:, column])
 
+        zhfont1 = matplotlib.font_manager.FontProperties(fname='C:\WINDOWS\FONTS\SIMSUN.TTC')
         self.dataview1.axes.bar(view.index,view)
         # self.gv_visual_data_content1.axes.legend()
 
