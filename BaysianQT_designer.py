@@ -35,7 +35,6 @@ class MyFigureCanvas(FigureCanvas):
     def __init__(self, xlabel,parent=None, width=6, height=6, dpi=100):
 
         # 创建一个Figure
-        zhfont1 = matplotlib.font_manager.FontProperties(fname='C:\WINDOWS\FONTS\SIMSUN.TTC')
         fig = plt.Figure(figsize=(width, height), dpi=dpi, tight_layout=True)  # tight_layout: 用于去除画图时两边的空白
 
         FigureCanvas.__init__(self, fig)  # 初始化父类
@@ -186,8 +185,6 @@ class drawWindow():
                                                      xlabel=data_processed.columns[column])
 
         view = data_processed.iloc[:, column].value_counts() / len(data_processed.iloc[:, column])
-
-        zhfont1 = matplotlib.font_manager.FontProperties(fname='C:\WINDOWS\FONTS\SIMSUN.TTC')
         self.dataview1.axes.bar(view.index,view)
         # self.gv_visual_data_content1.axes.legend()
 
