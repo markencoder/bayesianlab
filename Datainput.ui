@@ -59,7 +59,7 @@
    <widget class="QPushButton" name="Runbutton">
     <property name="geometry">
      <rect>
-      <x>580</x>
+      <x>590</x>
       <y>500</y>
       <width>81</width>
       <height>41</height>
@@ -100,12 +100,12 @@
      <rect>
       <x>50</x>
       <y>500</y>
-      <width>511</width>
+      <width>531</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>注：双击处理后数据所在列可查看其分布情况</string>
+     <string>注：双击某列可以对数据的分布进行预查看</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_2">

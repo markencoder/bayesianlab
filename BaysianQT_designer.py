@@ -20,6 +20,9 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 # from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from pgmpy.inference import VariableElimination
+from graphviz import Digraph
+from PySide2.QtCore import Qt,QDir, QTimer
+from PySide2.QtGui import QPixmap,QImage
 from pgmpy.factors.discrete import TabularCPD
 import seaborn as sns
 import bnlearn as bn
@@ -112,6 +115,7 @@ class Mainwindow():
         self.ui.tableView_result.doubleClicked.connect(self.dataview1)
         self.ui.tableView_result_2.doubleClicked.connect(self.dataview2)
 
+
     #出现子窗口的方法
     def childShowFun1(self):
         self.ui2 = ChildWindow()
@@ -121,12 +125,14 @@ class Mainwindow():
     #数据处理的方法
     def process(self):
         global data_processed
+        data_processed = data_processed.applymap(str)
         search_result_model = PdTable(data_processed)
         self.ui.tableView_result_2.setModel(search_result_model)    #展示数据处理结果
 
     #文件选择的方法
     def Fileselect(self):
         global data_processed
+        global data
         Selectinterface = QUiLoader().load('self.ui')     #导出一个空白的文件路径窗口
         filePath, _ = QFileDialog.getOpenFileName(
             Selectinterface,  # 父窗口对象
@@ -155,15 +161,46 @@ class Mainwindow():
             ['sale_after', 'lotf_after', 'lota_after', 'Overall Qual', 'Overall Cond', 'Kitchen Qual', 'House Style',
              'Roof Style']]
         '''
+        '''
+        max_1 = np.max(data['temp1'])
+        min_1 = np.min(data['temp1'])
+        interval_1 = (max - min) / 4
+        max_2 = np.max(data['temp2'])
+        min_2 = np.min(data['temp2'])
+        interval_2 = (max - min) / 4
+        max_3 = np.max(data['temp3'])
+        min_3 = np.min(data['temp3'])
+        interval_3 = (max - min) / 4
+        max_4 = np.max(data['temp4'])
+        min_4 = np.min(data['temp4'])
+        interval_4 = (max - min) / 4
+        '''
+        '''
+        for i in range(1,5):
+            maxx = np.round(np.max(data['temp'+str(i)]),2)
+            minn = np.round(np.min(data['temp'+str(i)]),2)
+            interval = np.round((maxx - minn) / 4,2)
+            data['temp'+str(i)+'pro'] = data['temp'+str(i)].apply(
+                lambda x: str(np.round(minn,2)) + '-' + str(np.round(minn + interval,2)) if minn <= x < minn + interval
+                else str(np.round(minn + interval,2)) + '-' + str(np.round(minn + interval * 2,2)) if minn + interval <= x < minn + 2 * interval
+                else str(np.round(minn + 2 * interval,2)) + '-' + str(np.round(minn + interval * 3,2)) if minn + 2 * interval <= x < minn + 3 * interval
+                else str(np.round(minn + 3 * interval,2)) + '-' + str(np.round(minn + interval * 4,2)))
+            data.drop(['temp'+str(i)],axis = 1,inplace = True)
         #将data_processed里面全部变成str类型
+        '''
         data_processed = data.applymap(str)
+        #data_processed = data_processed[['temp1pro','temp2pro','temp3pro','temp4pro','UU','UI','RPHSU','RPHSI','underU','overU','overI','overP','failurePh','loseU','underPF','RP']]
         search_result_model = PdTable(data_processed)
         self.ui.tableView_result.setModel(search_result_model)
 
         #展示数据分布
     def dataview1(self):
+        global data_processed
+        global data
         # data = self.ui.tableView_result_2.currentColumn().data()
+        data_processed = data
         column = self.ui.tableView_result.currentIndex().column()
+
         self.draw = drawWindow(column)
         self.draw.ui.show()
 
@@ -209,8 +246,8 @@ class ChildWindow():
         #设置窗口2的多选项按钮  的槽
         self.ui.buttonGroup.buttonClicked.connect(self.methodselect)
 
-        self.ui.BNButton.clicked.connect(self.BNdrawing)
-        self.ui.progressBar.setValue(0)
+        'self.ui.BNButton.clicked.connect(self.BNdrawing)'
+        'self.ui.progressBar.setValue(0)'
        # self.timer = QBasicTimer()
 
 
@@ -225,54 +262,160 @@ class ChildWindow():
     def methodselect(self):
         global data_processed
         global model_struct
-        self.ui.progressBar.setValue(0)
+        # self.ui.progressBar.setValue(0)
         #选择的id
         selectedbutton = self.ui.buttonGroup.checkedId()
 
         if selectedbutton == -2:
+            '''
             self.completed = 0
             while self.completed < 100:
                 self.completed += 0.001
                 self.ui.progressBar.setValue(self.completed)
+            '''
             #贝叶斯网络运算
             scoring_method = K2Score(data=data_processed)
             est = HillClimbSearch(data=data_processed)
             estimated_model = est.estimate(scoring_method=scoring_method, max_indegree=4, max_iter=int(1e4))
             model_struct = BayesianModel(estimated_model.edges())
             model_struct.fit(data=data_processed, estimator=MaximumLikelihoodEstimator)
+            '''
             df = pd.DataFrame(list(estimated_model.edges()))
             df = df.rename(columns={0: '父节点', 1: '子节点'})
             netgraph = PdTable(df)
             self.ui.graphview.setModel(netgraph)
+            '''
+            df = pd.DataFrame(list(estimated_model.edges()))
+
+            def same_element(list1, list2):
+                set1 = set(list1)
+                set2 = set(list2)
+                return (set1 & set2), (set1 ^ set2), ((set1 | set2) - set2), ((set1 | set2) - set1)
+
+            same, dif, alone_forward, alone_backward = same_element(df[0], df[1])
+            allelement = same ^ dif
+            dot = Digraph(name="Bayesiangraph", comment="the result", format="jpg")
+            for i in allelement:
+                dot.node(name=i, label=i, fontname="Microsoft YaHei")
+            for j in range(df.shape[0]):
+                dot.edge(df[0][j], df[1][j])
+            dot.render(filename='Bayesiangraph', view=True)
+            pixmap = QPixmap('Bayesiangraph.jpg')
+            self.ui.figurelabel.setPixmap(pixmap)
+
             if model_struct.check_model() != True:
                 self.ui.v_result.setText('模型异常，请更换方法')
             else:
                 self.ui.v_result.setText('模型正常，可继续使用')
+                self.ui.score.setText(str(K2Score(data_processed).score(model_struct)))
+
 
             self.t = self.t + 1
             #self.ui.Evidence.show()
 
+        elif selectedbutton == -3:
+            model_struct = BayesianModel([('温度测量', '温度超预设范围'),
+                                          ('温度超预设范围', '线路温度异常'),
+                                          ('线路温度异常', '温度升高'),
+                                          ('温度升高', '触及可燃物燃点'),
+                                          ('触及可燃物燃点', '灭火处理'),
+                                          ('灭火处理', '发生电气火灾'),
+                                          ('电火花测量', '电火花超预设范围'),
+                                          ('电火花超预设范围', '线路温度异常'),
+                                          ('电压测量', '电压超预设范围'),
+                                          ('电压超预设范围', '电压短断路'),
+                                          ('电压短断路', '温度升高'),
+                                          ('电压超预设范围', '三相不平衡'),
+                                          ('三相不平衡', '温度升高'),
+                                          ('电压超预设范围', '中性线电路故障'),
+                                          ('中性线电路故障', '温度升高'),
+                                          ('电压测量', '功率超预设范围'),
+                                          ('功率超预设范围', '线路温度异常'),
+                                          ('电压测量', '频率超预设范围'),
+                                          ('频率超预设范围', '谐波异常'),
+                                          ('谐波异常', '温度升高'),
+                                          ('电压测量', '阻抗超预设范围'),
+                                          ('阻抗超预设范围', '电气连接松动'),
+                                          ('电气连接松动', '温度升高'),
+                                          ('电压测量', '振幅超预设范围'),
+                                          ('振幅超预设范围', '谐波异常'),
+                                          ('电流测量', '电流超预设范围'),
+                                          ('电流超预设范围', '剩余电流异常'),
+                                          ('剩余电流异常', '温度升高'),
+                                          ('电流超预设范围', '电流过载'),
+                                          ('电流过载', '温度升高'),
+                                          ('电流超预设范围', '三相不平衡'),
+                                          ('电流超预设范围', '中性线电路故障'),
+                                          ('电流测量', '功率超预设范围'),
+                                          ('电流测量', '频率超预设范围'),
+                                          ('电流测量', '阻抗超预设范围'),
+                                          ('电流测量', '振幅超预设范围')])
+            model_struct.fit(data=data_processed, estimator=MaximumLikelihoodEstimator)
+            df = pd.DataFrame(list(model_struct.edges()))
+
+            def same_element(list1, list2):
+                set1 = set(list1)
+                set2 = set(list2)
+                return (set1 & set2), (set1 ^ set2), ((set1 | set2) - set2), ((set1 | set2) - set1)
+
+            same, dif, alone_forward, alone_backward = same_element(df[0], df[1])
+            allelement = same ^ dif
+            dot = Digraph(name="Bayesiangraph", comment="the result", format="jpg")
+            for i in allelement:
+                dot.node(name=i, label=i, fontname="Microsoft YaHei")
+            for j in range(df.shape[0]):
+                dot.edge(df[0][j], df[1][j])
+            dot.render(filename="Bayesiangraph", view=True)
+            pixmap = QPixmap('Bayesiangraph.jpg')
+            self.ui.figurelabel.setPixmap(pixmap)
+            self.t = self.t + 1
+            self.ui.v_result.setText('网络已建立，可进行推断')
+            self.ui.score.setText(str(K2Score(data_processed).score(model_struct)))
 
         elif selectedbutton == -4:
+            '''
             self.completed = 0
             while self.completed < 100:
                 self.completed += 1
                 self.ui.progressBar.setValue(self.completed)
+            '''
             est = PC(data_processed)
             estimated_model = est.estimate(variant='orig', max_cond_vars=4)
             model_struct = BayesianModel(estimated_model.edges())
             model_struct.fit(data=data_processed, estimator=MaximumLikelihoodEstimator)
+
+            '''
             df = pd.DataFrame(list(estimated_model.edges()))
             df = df.rename(columns={0: '父节点', 1: '子节点'})
             netgraph = PdTable(df)
             self.ui.graphview.setModel(netgraph)
+            '''
             if model_struct.check_model() != True:
                 self.ui.v_result.setText('模型异常，请更换方法')
             else:
                 self.ui.v_result.setText('模型正常，可继续使用')
-            self.t = self.t + 1
-            #self.ui.Evidence.show()
+                df = pd.DataFrame(list(estimated_model.edges()))
 
+                def same_element(list1, list2):
+                    set1 = set(list1)
+                    set2 = set(list2)
+                    return (set1 & set2), (set1 ^ set2), ((set1 | set2) - set2), ((set1 | set2) - set1)
+
+                same, dif, alone_forward, alone_backward = same_element(df[0], df[1])
+                allelement = same ^ dif
+                dot = Digraph(name="Bayesiangraph", comment="the result", format="jpg")
+                for i in allelement:
+                    dot.node(name=i, label=i,fontname="Microsoft YaHei")
+                for j in range(df.shape[0]):
+                    dot.edge(df[0][j], df[1][j])
+                dot.render(filename="Bayesiangraph", view=True)
+                pixmap = QPixmap('Bayesiangraph.jpg')
+                self.ui.figurelabel.setPixmap(pixmap)
+                self.ui.score.setText(str(K2Score(data_processed).score(model_struct)))
+                self.t = self.t + 1
+
+            #self.ui.Evidence.show()
+'''
     def BNdrawing(self):
         if self.t == 0:
             MainWindow = QMainWindow()
@@ -282,9 +425,10 @@ class ChildWindow():
             'bn.plot(model_struct, figsize=(15, 12),prop="SimSun")'
             plt.rcParams['font.family'] = ['sans-serif']
             plt.rcParams['font.sans-serif'] = ["SimSun"]
-            nx.draw_circular(model_struct, with_labels=True, arrowsize=30, node_size=800, alpha=0.3, font_weight='bold')
+            G = nx.DiGraph(model_struct)
+            nx.draw(G, with_labels=True, arrowsize=30, node_size=800, alpha=1, font_weight='bold')
             plt.show()
-
+'''
 
 
 class ChildWindow2():
@@ -338,8 +482,9 @@ class ChildWindow2():
 
     def modelinference(self):
         global model_struct
+        global data_processed
 
-        #画目标节点修正前与修正后的图
+        '画目标节点修正前与修正后的图'
         self.gv_visual_data_content2 = MyFigureCanvas(width=self.ui.Targetbefore.width() / 101,
                                                       height=self.ui.Targetbefore.height() / 101,
                                                       xlabel=self.ui.TargetcomboBox.currentText())  # 实例化一个FigureCanvas
@@ -347,6 +492,19 @@ class ChildWindow2():
         self.gv_visual_data_content3 = MyFigureCanvas(width=self.ui.Targetafter.width() / 101,
                                                       height=self.ui.Targetafter.height() / 101,
                                                       xlabel=self.ui.TargetcomboBox.currentText())  # 实例化一个FigureCanvas
+
+        self.gv_visual_data_content4 = MyFigureCanvas(width=self.ui.Targetafter.width() / 101,
+                                                      height=self.ui.Targetafter.height() / 101,
+                                                      xlabel=self.ui.EvidencecomboBox.currentText())  # 实例化一个FigureCanvas
+
+        tem = data_processed[self.ui.EvidencecomboBox.currentText()].value_counts() / len(data_processed[self.ui.EvidencecomboBox.currentText()])
+        tem[self.ui.IntervalcomboBox.currentText()]=1
+        tem[~(tem.index == self.ui.IntervalcomboBox.currentText())]=0
+        self.gv_visual_data_content4.axes.bar(tem.index, tem, color='red')
+        self.graphic_scene = QGraphicsScene()
+        self.graphic_scene.addWidget(self.gv_visual_data_content4)
+        self.ui.Evidence.setScene(self.graphic_scene)
+        self.ui.Evidence.show()
 
         model_infer = VariableElimination(model_struct)
         q_before = model_infer.query(variables=[self.ui.TargetcomboBox.currentText()])
@@ -357,7 +515,7 @@ class ChildWindow2():
                                               q_before.values, label='Evidence distribution')
         self.graphic_scene = QGraphicsScene()  # 创建一个QGraphicsScene
         self.graphic_scene.addWidget(
-            self.gv_visual_data_content2)  # 把图形放到QGraphicsScene中，注意：图形是作为一个QWidget放到放到QGraphicsScene中的
+        self.gv_visual_data_content2)  # 把图形放到QGraphicsScene中，注意：图形是作为一个QWidget放到放到QGraphicsScene中的
         self.ui.Targetbefore.setScene(self.graphic_scene)  # 把QGraphicsScene放入QGraphicsView
         self.ui.Targetbefore.show()
 
@@ -366,10 +524,13 @@ class ChildWindow2():
         self.gv_visual_data_content3.axes.bar(q_after.state_names[self.ui.TargetcomboBox.currentText()],
                                               q_after.values, label=self.ui.TargetcomboBox.currentText())
         self.graphic_scene = QGraphicsScene()  # 创建一个QGraphicsScene
-        self.graphic_scene.addWidget(
-            self.gv_visual_data_content3)  # 把图形放到QGraphicsScene中，注意：图形是作为一个QWidget放到放到QGraphicsScene中的
+        self.graphic_scene.addWidget(self.gv_visual_data_content3)  # 把图形放到QGraphicsScene中，注意：图形是作为一个QWidget放到放到QGraphicsScene中的
         self.ui.Targetafter.setScene(self.graphic_scene)  # 把QGraphicsScene放入QGraphicsView
         self.ui.Targetafter.show()
+
+
+
+
     def exit(self):
         sys.exit()
 
